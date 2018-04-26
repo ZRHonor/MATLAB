@@ -1,0 +1,30 @@
+{
+    // 以像素为单位控制字号。
+    "editor.fontSize": 18,
+    // 配置 glob 模式以在搜索中排除文件和文件夹。例如，文件资源管理器根据此设置决定文件或文件夹的显示和隐藏。
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/.idea": true,
+        "**/.simvision": true,
+        "**/INCA_libs": true,
+        "**/waves.shm": true,
+        
+        "**/documents": true,
+        
+        "**/*.pdf": true,
+        "**/*.jpg": true,
+        "**/*.doc": true,
+        "**/*.docx": true,
+        "**/*.ppt": true,
+        "**/*.pptx": true,       
+        "**/*.png": true
+    },
+    "git.autofetch": true,
+
+    // 如果启用，会在打开文件时尝试猜测字符集编码。也可以根据语言配置此设置。
+    "files.autoGuessEncoding": true,
+}
