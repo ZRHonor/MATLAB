@@ -42,30 +42,32 @@ title('after step2');
 % step3 距离徙动校正
 % dR = fftshift(fft((Doppler_centroid*lambda/2)*tm));
 % dR1 = lambda^2*R0*fa.^2/(8*v^2)\
-Ka = -2*v^2/(lambda*R0);
-% dR = Doppler_centroid*lambda/2*fa./(-Ka);
-% H_RCMC = exp(j*4*pi*fa.*dR/c);
+% Ka = -2*v^2/(lambda*R0);
+% % dR = Doppler_centroid*lambda/2*fa./(-Ka);
+% % H_RCMC = exp(j*4*pi*fa.*dR/c);
+% 
+% Nf = 2^nextpow2(Nrn);
+% Ns  = 2^nextpow2(Nan);
+% fd_r = [-Nf/2 : (Nf/2 - 1)] * Fs / Nf;
+% FF = ones(Ns, 1) * fd_r;                                 % FF为N*M的矩阵
+% fdc = Doppler_centroid;                                                 % doppler center
+% fd_a = [-Ns/2 : (Ns/2 - 1)] * PRF / Ns;
+% FU = fd_a.' * ones(1, Nf);
+% Refcorr = exp(j * pi / fc^2 / Ka * (FU.*FF).^2 + j * pi * fdc^2 / fc / Ka * FF - j * pi / fc / Ka * FU.^2 .* FF); % Range-Doppler domain
 
-Nf = 2^nextpow2(Nrn);
-Ns  = 2^nextpow2(Nan);
-fd_r = [-Nf/2 : (Nf/2 - 1)] * Fs / Nf;
-FF = ones(Ns, 1) * fd_r;                                 % FF为N*M的矩阵
-fdc = Doppler_centroid;                                                 % doppler center
-fd_a = [-Ns/2 : (Ns/2 - 1)] * PRF / Ns;
-FU = fd_a.' * ones(1, Nf);
-Refcorr = exp(j * pi / fc^2 / Ka * (FU.*FF).^2 + j * pi * fdc^2 / fc / Ka * FF - j * pi / fc / Ka * FU.^2 .* FF); % Range-Doppler domain
-
-S_t_fa = S_t_fa.*Refcorr;
-figure;imagesc(abs(S_t_fa));
-xlabel('方位向');ylabel('距离向');
-title('After step3');
+% dR = (Doppler_centroid*lambda/2)*tm;
+% dR_fa = exp(-j*dR*fc);
+% S_t_fa = (dR_fa'*S_t_fa')';
+% figure;imagesc(abs(S_t_fa));
+% xlabel('方位向');ylabel('距离向');
+% title('After step3');
 % s_t_tm_RCMC=ifft(ifftshift(S_t_fa.*H_,2),[],2);
 % S_f_tm_RCMC = S_f_tm_RangeComp.*H_RCMC;
 % s_t_tm_RCMC=ifft(ifftshift(S_f_tm_RangeComp,1),[],1);
 % figure;imagesc(abs(s_t_tm_RCMC));
 % xlabel('方位向');ylabel('距离向');
 % title('距离徙动校正后的结果');
-
+fa=fftshift(fa);
 % 方位压缩
 % S_t_fa = fftshift(fft(s_t_tm_RangeComp,[],2),2);
 Ka=2*v^2/(lambda*R0);
@@ -74,6 +76,8 @@ S_t_fa_AC = S_t_fa.*H_AC;
 s_t_tm_AC = ifft(ifftshift(S_t_fa_AC,2),[],2);
 figure;imagesc(abs(s_t_tm_AC));
 xlabel('方位向');ylabel('距离向');
+colormap(gray);
+imcontrast;
 title('方位压缩后的结果');
-
+I = Contrast(s_t_tm_AC);
 toc

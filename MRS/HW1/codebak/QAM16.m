@@ -1,7 +1,7 @@
 clc;
 clear
 close all;
-M=16;
+M=64;
 k=log2(M);
 n=120000;
 samp=1;%过采样率？？？？？？？？？

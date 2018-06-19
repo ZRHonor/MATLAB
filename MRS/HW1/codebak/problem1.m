@@ -4,7 +4,7 @@ close all
 tic
 %参数设定
 M=10;
-DOA =[5 45 65]*pi/180;
+DOA =[30 45 60]*pi/180;
 SNR=10;
 d = 0.5;
 N = 400;
@@ -28,9 +28,8 @@ for i =1:length(angle)
     y(i) = sqrt(abs(a'*R*a));
     y2(i) = sqrt(abs(w'*R*w));
 end
-
-doa_CBF = ESA(angle, y, P)
-doa_MVDR = ESA(angle, y2, P)
+doa = ESA(angle, y, P)
+doa1 = ESA(angle, y2, P)
 plot(angle,20*log(y/max(y)),angle,20*log(y2/max(y2)))
 xlabel('\theta/degree');
 ylabel('Sgnal Magnitude/dB');

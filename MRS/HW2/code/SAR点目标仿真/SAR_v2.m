@@ -53,63 +53,67 @@ for ii=1:TargetNumber
     phase=pi*Kr*(t*ones(1,Nan)-ones(Nrn,1)*tau).^2-4*pi/lambda*ones(Nrn,1)*R_tm;
     Target_RangeWin=abs(t*ones(1,Nan)-ones(Nrn,1)*tau)<=Tp/2;
     Target_AziWin=abs((v*ones(Nrn,1)*tm)-Ptarget(ii,1))<=AL/2;
-    Echo=Echo+sigma*exp(j*phase).*Target_RangeWin.*Target_AziWin;
+    Echo=Echo+sigma*exp(1j*phase).*Target_RangeWin.*Target_AziWin;
 end
 Noise=1*am_n/sqrt(2)*(randn(Nrn,Nan)+1j*randn(Nrn,Nan));  %---产生的噪声
 Signal=Echo+Noise;                                       %---产生的目标+噪声回波信号
-figure;imagesc(abs(Signal));
-%colorbar;
+figure;imagesc(abs(Signal));colorbar;
 xlabel('方位向');ylabel('距离向');
 title('回波数据');
-colormap(gray)
 
 %% 数据处理
 tic
 
-% step1 距离压缩
-S_f_tm = fftshift(fft(fftshift(Signal)));
-H_f = exp(-j*pi*(fr.^2/Kr))*ones(1,Nan);
-S_f_tm = S_f_tm.*H_f;
-s_t_tm = fftshift(ifft(fftshift(S_f_tm)));
+Cs = ones(1, Nrn)'*(fc./sqrt(fc^2 - fa.^2 ) - 1);
 
-figure;imagesc(abs(s_t_tm));
-%colorbar;
-xlabel('方位向');ylabel('距离向');
-title('距离徙动校正前的结果');
-% title('a')
-colormap(gray);
+% step1 方位FFT
+S_t_fa = fftshift(fft(fftshift(Signal, 2), [], 2), 2);
 
+% step2 距离FFT
+S_f_fa = fftshift(fft(fftshift(S_t_fa)));
+S_f_fa_2 =  S_f_fa;                                      % 备份，作图用
 
-% step2 方位FFT
-S_t_fa = fftshift(fft(fftshift(s_t_tm, 2), [], 2), 2);
-
-% step3 距离徙动校正
-S_f_fa= fftshift(fft(fftshift(S_t_fa)));
-
+% step3 距离徙动矫正
 R = linspace(R0-Rm/2-Tp*c/4,R0+Rm/2+Tp*c/4,Nrn)';
 dR_fa = (lambda^2/(8*v^2))*(R)*(fa.^2);
 S_f_fa = S_f_fa.*exp(j*4*pi*(fr*ones(1,Nan)).*dR_fa/c);
+S_f_fa_3 =  S_f_fa;
 
+% step4 距离压缩
+RCM = exp(j*pi*(fr.^2/Kr))*ones(1,Nan);
+S_f_fa = S_f_fa.*RCM;
+
+% step5 距离IFFT
 S_t_fa = fftshift(ifft(fftshift(S_f_fa)));
+S_t_fa_5 =  S_t_fa;
 
-s_t_tm = fftshift(ifft(S_t_fa, [], 2), 2);
-figure;imagesc(abs(s_t_tm));
-%colorbar;
-xlabel('方位向');ylabel('距离向');
-title('距离徙动校正之后的结果');
-% title('b')
-colormap(gray);
-
-
-% step4 方位压缩
+% step6 方位压缩
 Ka=2*v^2/(lambda*R0);
 Haz_t_fa = ones(1,Nrn)'*exp(-j*pi*fa.^2/Ka);
 S_t_fa = S_t_fa.*Haz_t_fa;
 
-% step5 方位IFFT
-s_t_tm = fftshift(ifft(S_t_fa, [], 2), 2);
-figure;imagesc(abs(s_t_tm));
-%colorbar;
+% step7 方位IFFT
+s_t_ta = fftshift(ifft(S_t_fa, [], 2), 2);
+figure;imagesc(abs(s_t_ta));colorbar;
+xlabel('方位向');ylabel('距离向');
+title('Result');
+colormap(gray);
+
+%% 作图对比
+% 不进行方位向压缩，便于观察
+
+% 距离徙动校正
+s_t_ta = fftshift(ifft(S_t_fa_5, [], 2), 2);
+figure;imagesc(abs(s_t_ta));colorbar;
+xlabel('方位向');ylabel('距离向');
+title('距离徙动校正后');
+colormap(gray);
+
+% 距离徙动校正前
+S_f_fa = S_f_fa_2.*RCM;                         % 距离压缩
+S_t_fa = fftshift(ifft(fftshift(S_f_fa)));      % 距离IFFT
+s_t_ta = fftshift(ifft(S_t_fa, [], 2), 2);      % 方位IFFT
+figure;imagesc(abs(s_t_ta));colorbar;
 xlabel('方位向');ylabel('距离向');
 title('Result');
 colormap(gray);

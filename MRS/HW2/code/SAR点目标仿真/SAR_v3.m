@@ -53,7 +53,7 @@ for ii=1:TargetNumber
     phase=pi*Kr*(t*ones(1,Nan)-ones(Nrn,1)*tau).^2-4*pi/lambda*ones(Nrn,1)*R_tm;
     Target_RangeWin=abs(t*ones(1,Nan)-ones(Nrn,1)*tau)<=Tp/2;
     Target_AziWin=abs((v*ones(Nrn,1)*tm)-Ptarget(ii,1))<=AL/2;
-    Echo=Echo+sigma*exp(j*phase).*Target_RangeWin.*Target_AziWin;
+    Echo=Echo+sigma*exp(1j*phase).*Target_RangeWin.*Target_AziWin;
 end
 Noise=1*am_n/sqrt(2)*(randn(Nrn,Nan)+1j*randn(Nrn,Nan));  %---产生的噪声
 Signal=Echo+Noise;                                       %---产生的目标+噪声回波信号
@@ -66,9 +66,11 @@ colormap(gray)
 %% 数据处理
 tic
 
+Cs = ones(1, Nrn)'*(fc./sqrt(fc^2 - fa.^2 ) - 1);
+
 % step1 距离压缩
 S_f_tm = fftshift(fft(fftshift(Signal)));
-H_f = exp(-j*pi*(fr.^2/Kr))*ones(1,Nan);
+H_f = exp(j*pi*(fr.^2/Kr))*ones(1,Nan);
 S_f_tm = S_f_tm.*H_f;
 s_t_tm = fftshift(ifft(fftshift(S_f_tm)));
 
